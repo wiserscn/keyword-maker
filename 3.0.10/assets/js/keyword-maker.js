@@ -64,7 +64,7 @@
 	_folder = {
 		folderdata: null,
 		// create a new folder. return all folder data.
-		create : function() {
+		create : function(foldername) {
 			var folder = {}, folderdata = this.folderdata, newindex, newname;
 
 			if (!folderdata) {
@@ -73,7 +73,12 @@
 				folderdata.list = [];
 			}
 			newindex = folderdata.list.length;
-			newname = "Folder " + (newindex + 1);
+			if (foldername) {
+				newname = foldername;
+			} else {
+				newname = "Folder " + (newindex + 1);
+			}
+
 			folder.name = newname;
 			folder.layout = null;
 			folder.propdata = {};
@@ -103,12 +108,11 @@
 				}
 				_memo.curFolderIndex = folderdata.lastShowFolderIndex = nextindex;
 				this.save(folderdata);
+				this.show(nextindex);
 				this.refreshList();
 			} else {
 				this.create();
 			}
-
-			this.show(nextindex);
 		},
 		// load folder to current environment
 		show: function(index) {
@@ -119,7 +123,6 @@
 				_memo.propdata = folder.propdata;
 				_memo.oid = folder.maxoid;
 				$("#js_folder_name").html(folder.name);
-				//document.title = folder.name;
 				if (window.canvasHtml) $(".canvas").html(window.canvasHtml);
 
 				_memo.curFolderIndex = index; // set new created folder as current
@@ -157,6 +160,7 @@
 				return '<li><a href="#" data-folder-index="' + index + '">' + value.name +'</a></li>';
 			});
 			$(".js-folders").html(html);
+			$(".js-folder-dropdown>.badge").html(list.length);
 		},
 		// rename the current editing folder
 		rename: function(index, name) {
@@ -171,10 +175,7 @@
 		startdrag: 0,
 		stopsave: 0,
 		supportstorage: function() {
-			if (typeof window.localStorage === "object")
-				return true;
-			else
-				return false;
+			return typeof window.localStorage === "object";
 		},
 		handleSaveLayout: function() {
 			var e = $(".canvas").html();
@@ -227,14 +228,6 @@
 		hasupdate: false, // flag to avoid multiple same update operation.
 		setUpateReady: function() { _tool.hasupdate = true; },
 		resetUpdate: function() { _tool.hasupdate = false; },
-		/*updateItemPanelInfo: function(panelType, info) {
-			var $panel = $("#selected_item_panel");
-
-			if (panelType === "copy-panel") $panel = $("#copy_item_panel");
-			$panel.find(".js-item").html(info.item);
-			$panel.find(".js-oid").html(info.oid);
-			$panel.find(".js-about").html(info.about);
-		},*/
 		// copy an argument to copy board
 		copyArg: function(copyOid) {
 			var copySource = $(".argument[data-oid=" + copyOid + "]"),
@@ -264,8 +257,8 @@
 				$copy.attr("data-oid", _memo.newOid());
 				$childArgs.each(function() {
 					var that = $(this),
-						originOid = that.attr("data-oid"),
-						originRefoid = that.attr("data-ref-oid"),
+						//originOid = that.attr("data-oid"),
+						//originRefoid = that.attr("data-ref-oid"),
 						argtype = that.attr("data-arg-type"),
 						newoid = _memo.newOid();
 
@@ -285,7 +278,7 @@
 							$toAppendArg = $copy;
 						} else {
 							$listchip = $copy;
-							var $toAppendArg = page.helper.createListArgContainer();
+							$toAppendArg = page.helper.createListArgContainer();
 							$toAppendArg.find("ul").append($listchip);
 
 							refoid = $copy.attr("data-ref-oid");
@@ -426,7 +419,7 @@
 		},
 		// remove argument from container
 		removeArg: function(oid) {
-			page.confirm('Are you sure to remove?', function(index){
+			page.confirm('Are you sure to remove?', function(){
 				var popoverFm = $("#popover_form");
 				// var oid = popoverFm.attr("target-oid");
 				var $toRemoveArg = $(".argument[data-oid=" + oid + "]");
@@ -478,7 +471,7 @@
 				$(".canvas .card").removeClass(highlightClass);
 			} else {
 				$(".canvas .card").removeClass("select-highlight copy-highlight");
-			}			
+			}
 		},
 		// like closest, but down to children, get the close children by condition of the filter
 		closestDescendent: function(me, filter) {
@@ -511,7 +504,7 @@
 		// replace {@@} with blank space and add score at the end.
 		formatKwd: function(keywordlist, score) {
 			for (var i = 0, len = keywordlist.length; i < len; i++) {
-				keywordlist[i] = keywordlist[i].replace(/\{@@\}/g, " ") + " " + score;
+				keywordlist[i] = keywordlist[i].replace(/\{@@}/g, " ") + " " + score;
 			}
 			return keywordlist;
 		},
@@ -596,7 +589,7 @@
 	page = {
 		initSelectOptions: function() {
 			var funcs = _const.operatorFuncs;
-			$.each(funcs, function (name, item) {
+			$.each(funcs, function (name) {
 				$('.js-func-select').append(new Option(name));
 			});
 		},
@@ -607,7 +600,7 @@
 				items:".argument",
 				activeClass: "ui-state-active",
 				hoverClass: "ui-state-hover",
-				receive: function(ev, ui) {
+				receive: function() {
 					var $placeholder = $(this).find(">.rule-placeholder");
 
 					if ($placeholder.length > 0) {
@@ -615,7 +608,7 @@
 						page.helper.addRulePlaceholder();
 					}
 				},
-				start: function(e,t) {
+				start: function() {
 					if (!_save.startdrag) _save.stopsave++;
 					_save.startdrag = 1;
 				},
@@ -629,7 +622,7 @@
 			// Init arg-contianer droppable to get ready to accept drag elements
 			page.events.argContainerDroppable();
 			// add rule placeholder if there is no one.
-			if ($(".canvas").find(">.rule-placeholder").length === 0) {
+			if ($(".canvas>.rule-placeholder").length === 0) {
 				page.helper.addRulePlaceholder();
 			}
 			// restore clicked arguments
@@ -678,12 +671,12 @@
 				page.helper.addRulePlaceholder();
 			},
 			addRulePlaceholder: function() {
-				var $placeholder = $("#rule_placeholder .rule-placeholder").clone();
+				var $placeholder = $("#rule_placeholder").find(".rule-placeholder").clone();
 				$(".canvas").append($placeholder);
 			},
 			toggleProp: function(argType, toShowCharDistance) {
 				var props = _const.propAry[argType],
-					$propDivParent = $("#argument_prop>div"),
+					$propDivParent = $("#argument_prop").find(">div"),
 					propClassName;
 
 				// hide all first
@@ -851,11 +844,11 @@
 					accept: ":not(.ui-sortable-helper)",
 					greedy: true,
 					tolerance: "intersect",
-					start: function(ev, ui) {
+					start: function() {
 						if (!_save.startdrag) _save.stopsave++;
 						_save.startdrag = 1;
 					},
-					stop: function(ev, ui) {
+					stop: function() {
 						if(_save.stopsave>0) _save.stopsave--;
 						_save.startdrag = 0;
 					},
@@ -928,7 +921,7 @@
 						}
 
 					},
-					start: function(ev, ui) {
+					start: function() {
 						if (!_save.startdrag) _save.stopsave++;
 						_save.startdrag = 1;
 					},
@@ -980,7 +973,7 @@
 
 								// clear empty list-arg-container which has no any list-chip
 								var listArgs = $(this).find(">.box-list");
-								listArgs.each(function(index, ele){
+								listArgs.each(function(){
 									var $that = $(this);
 									if ($that.find(">ul").children().length === 0) {
 										$that.remove();
@@ -1003,11 +996,11 @@
 					accept: ":not(.ui-sortable-helper), .argument[data-arg-type=ListChip]",
 					greedy: true,
 					tolerance: "intersect",
-					start: function(ev, ui) {
+					start: function() {
 						if (!_save.startdrag) _save.stopsave++;
 						_save.startdrag = 1;
 					},
-					stop: function(ev, ui) {
+					stop: function() {
 						if(_save.stopsave>0) _save.stopsave--;
 						_save.startdrag = 0;
 					},
@@ -1131,7 +1124,7 @@
 
 			// drag event of row, comment
 			$(".sidebar .ly-row").draggable({
-				handle: ".label",			
+				handle: ".label",
 				cursorAt: { right: -100 },
 				opacity: .35,
 				zIndex: 999,
@@ -1141,13 +1134,13 @@
 				drag: function(e, t) {
 					t.helper.width(300)
 				},
-				start: function(ev, ui) {
+				start: function() {
 					var oid = _memo.newOid();
 					$(".sidebar .ly-row").attr("data-oid", oid);
 					if (!_save.startdrag) _save.stopsave++;
 					_save.startdrag = 1;
 				},
-				stop: function(e, t) {
+				stop: function() {
 					$(".sidebar .ly-row").removeAttr("data-oid");
 					page.rebindEvents();
 					if(_save.stopsave>0) _save.stopsave--;
@@ -1167,11 +1160,11 @@
 				drag: function(e, t) {
 					t.helper.width(150);
 				},
-				start: function(ev, ui) {
+				start: function() {
 					if (!_save.startdrag) _save.stopsave++;
 					_save.startdrag = 1;
 				},
-				stop: function(e, t) {
+				stop: function() {
 					page.rebindEvents();
 					if(_save.stopsave>0) _save.stopsave--;
 					_save.startdrag = 0;
@@ -1190,12 +1183,12 @@
 				drag: function(e, t) {
 					//t.helper.width(200);
 				},
-				start: function( event, ui ) {
+				start: function() {
 			       $(this).data('preventBehaviour', true);
 					if (!_save.startdrag) _save.stopsave++;
 					_save.startdrag = 1;
 			    },
-				stop: function(e, t) {
+				stop: function() {
 					page.rebindEvents();
 					// t.helper.remove();
 					if(_save.stopsave>0) _save.stopsave--;
@@ -1212,8 +1205,12 @@
 			});
 
 			$(".js-newfolder").click(function() {
-				_folder.create();
-				//layer.msg("New folder has been created.");
+				var foldername = "Folder " + (_folder.folderdata.list.length + 1);
+				layer.prompt({title: "Create folder", formType: 0, value: foldername}, function(text, index){
+					layer.close(index);
+					_folder.create(text);
+				});
+				//_folder.create();
 			});
 			$(".js-destroy").click(function() {
 				page.confirm('Are you sure to destroy this folder?', function(){
@@ -1237,7 +1234,7 @@
 
 			// click preview button
 			$(".js-preview").click(function() {
-				var selectedOid = _memo.selected_arg_oid,
+				var selectedOid = _memo.selected_arg_oid, $previewModal = $("#preview_modal"),
 					thispage = page;
 				if (selectedOid === "oid_0") {
 					thispage.showNotification("No rule selected, please select a rule first.");
@@ -1264,8 +1261,8 @@
 				argsData = thispage.helper.getArgumentData($childArg);
 				if (argsData !== null) {
 					renderList = _render.renderRule(argsData, score);
-					$('#preview_modal textarea').html(renderList.join("\n"));
-					$("#preview_modal").removeClass("hide");
+					$previewModal.find("textarea").html(renderList.join("\n"));
+					$previewModal.removeClass("hide");
 					layer.open({
 						type: 1,
 						title: "Preview (" + ruletitle + ")",
@@ -1305,7 +1302,7 @@
 				var func = $(this).val();
 				var res = page.helper.updateOperatorType(func, oid);
 				if (res) {
-					$("#argument_prop .js-func-select").val(func);
+					$("#argument_prop").find(".js-func-select").val(func);
 				} else {
 					//restore to previous value
 					$(this).val($operator.attr("data-func"));
@@ -1333,14 +1330,14 @@
 				_tool.setUpateReady();
 				_tool.updateArg(_const.canvas_oid); // update previous arg data.
 				page.helper.toggleProp("Canvas");
-				$("#argument_prop #js_arg_type").html("Canvas");
+				$("#argument_prop").find("#js_arg_type").html("Canvas");
 				page.events.switchOnPropPanel();
 				_tool.clearHighlight(_const.select_highlight_class);
 				_memo.selected_arg_oid = _const.canvas_oid;
 			});
 
 			// click tab head on side bar
-			$('#navTabs a').click(function (e) {
+			$('#navTabs').find("a").click(function (e) {
 				e.preventDefault();
 				$(this).tab('show')
 			});
@@ -1356,7 +1353,7 @@
 			layer.msg(msg, {
 				//offset: "b",//["9px", "200px"],
 				icon: 0,
-				area: "500px",
+				area: "500px"
 				//closeBtn: 1,
 				//time: 5000
 			});
