@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<link rel="apple-touch-icon" sizes="76x76" href="assets/img/favicon.ico">
+	<link rel="icon" type="image/png" sizes="96x96" href="assets/img/favicon.ico">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+	<title>Keyword Maker</title>
+
+	<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+    <meta name="viewport" content="width=device-width" />
+
+    <!-- Bootstrap core CSS     -->
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Animation library for notifications   -->
+    <link href="assets/css/animate.min.css" rel="stylesheet"/>
+
+    <!--  Paper Dashboard core CSS    -->
+    <link href="assets/css/base.css" rel="stylesheet"/>
+
+
+    <link href="assets/css/keyword-maker.css" rel="stylesheet" />
+
+    <!--  Fonts and icons     -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'> -->
+    <link href="assets/css/themify-icons.css" rel="stylesheet">
+
+</head>
+<body>
+
+<div class="wrapper">
+    <!-- dragg help holder -->
+    <div class="helper-holder"></div>
+    <div class="sidebar" data-background-color="white" data-active-color="danger">
+
+    <!--
+		Tip 1: you can change the color of the sidebar's background using: data-background-color="white | black"
+		Tip 2: you can change the color of the active button using the data-active-color="primary | info | success | warning | danger"
+	-->
+
+    	<div class="sidebar-wrapper">
+            <div class="logo"><a href="#" class="simple-text">Keyword Maker</a></div>
+
+            <ul class="nav nav-tabs" id="navTabs">
+                <li class="active"><a href="#argument_new">New</a></li>
+                <li><a href="#argument_prop">Prop</a></li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="tab-pane active" id="argument_new">
+                <ul class="sample-arg-list">
+                    <li>
+                        <div class="argument ly-row" data-arg-type="Rule" data-score="^20/10/5/1" data-arg-limit="1">
+                            <div class="preview row">
+                                <div class="col-xs-2"><a href="#" title="drag to insert">
+                                <span class="label label-primary"><span class="ti-move"></span> Drag</span></a></div>
+                                <div class="col-xs-offset-2 col-xs-8">Rule</div>
+                            </div>
+                            <div class="view">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card bg-rule">
+                                            <div class="header">rule</div>
+                                            <div class="content">
+                                                <ul class="list-inline arg-container">
+                                                    <li class="placeholder li-placeholder">
+                                                        <div class="card arg-placeholder">
+                                                            <div class="content">argumt</div>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="ly-operator">
+                            <div class="preview row">
+                                <div class="col-xs-2"><a href="#" title="drag to insert">
+                                <span class="label label-primary"><span class="ti-move"></span> Drag</span></a></div>
+                                <div class="col-xs-offset-2 col-xs-8">
+                                    <select class="js-func-select"></select>
+                                </div>
+                            </div>
+                            <div class="view">
+                                <ul class="module">
+                                    <li class="argument box-operator" data-arg-type="Operator">
+                                        <div class="card">
+                                            <div class="header">AND/PAR</div>
+                                            <div class="content">
+                                                <ul class="list-inline arg-container" data-arg-limit=0>
+                                                    <li class="placeholder li-placeholder">
+                                                        <div class="card arg-placeholder">
+                                                            <div class="content">argumt</div>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                                
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="ly-list">
+                            <div class="preview row">
+                                <div class="col-xs-2"><a href="#" title="drag to insert">
+                                <span class="label label-primary"><span class="ti-move"></span> Drag</span></a></div>
+                                <div class="col-xs-offset-2 col-xs-8">List</div>
+                            </div>
+                            <div class="view">
+                                <ul class="module">
+                                    <!--<li class="argument box-list" data-arg-type="List">
+                                        <div class="argument singleton" data-arg-type="ListChip" data-ws-tolerance="3">
+                                            <div class="card">
+                                                <div class="header">list</div>
+                                            </div>
+                                        </div>
+                                        <div class="argument pregnant">
+                                            <ul class="list-arg-container">
+                                                <li class="argument" data-arg-type="ListChip" data-ws-tolerance="3">
+                                                    <div class="card">
+                                                        <div class="header">list</div>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </li>-->
+                                    <li class="argument box-list" data-arg-type="List">
+                                        <ul class="list-arg-container">
+                                            <li class="argument" data-arg-type="ListChip">
+                                                <div class="card">
+                                                    <div class="header">list</div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="argument ly-row" data-arg-type="Comment">
+                            <div class="preview row">
+                                <div class="col-xs-2"><a href="#" title="drag to insert">
+                                <span class="label label-primary"><span class="ti-move"></span> Drag</span></a></div>
+                                <div class="col-xs-offset-2 col-xs-8">Comment</div>
+                            </div>
+                            <div class="view">
+                                <div class="row">
+                                    <div class="column col-md-12">
+                                        <div class="card">
+                                            <div class="header">
+                                                 <h4 class="title">Comment</h4>
+                                            </div>
+                                            <div class="content">
+                                                <textarea class="form-control border-input"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+
+                </div>
+                <div class="tab-pane prop-panel" id="argument_prop">
+                    <div class="form-horizontal">
+                        <div class="form-group js-arg-type">
+                            <label class="col-sm-4 control-label">Type:</label>
+                            <div class="col-sm-4 control-label prop-value" id="js_arg_type"></div>
+                            <div class="col-sm-4">
+                                <!--<button class="btn btn-xs btn-info js-update">Update</button>-->
+                                <button class="btn btn-xs btn-info js-paste">Paste</button>
+                            </div>
+                        </div>
+                        <div class="form-group js-arg-name">
+                            <label class="col-sm-4 control-label" for="js_arg_name">name:</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control border-input input-sm" id="js_arg_name">
+                            </div>
+                        </div>
+                        <div class="form-group js-func">
+                            <label class="col-sm-4 control-label">Function:</label>
+                            <div class="col-sm-8">
+                                <select class="form-control border-input input-sm js-func-select" id="js_func"></select>
+                            </div>
+                        </div>
+                        <div class="form-group js-char-distance">
+                            <label class="col-sm-8 control-label" for="js_score">character distance:</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control border-input input-sm" id="js_char_distance">
+                            </div>
+                        </div>
+                        <div class="form-group js-sent-distance">
+                            <label class="col-sm-8 control-label" for="js_score">sentence distance:</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control border-input input-sm" id="js_sent_distance">
+                            </div>
+                        </div>
+                        <div class="form-group js-score">
+                            <label class="col-sm-4 control-label" for="js_score">score:</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control border-input input-sm" id="js_score">
+                            </div>
+                        </div>
+                        <div class="form-group js-ws-tolerance">
+                            <label class="col-sm-8 control-label" for="js_ws_tolerance">whitespace tolerance:</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control border-input input-sm" id="js_ws_tolerance">
+                            </div>
+                        </div>
+
+                        <div class="form-group js-kwd-list">
+                            <div class="col-sm-12"><textarea class="form-control" rows="15" id="js_kwd_list"></textarea></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    	</div>
+    </div>
+
+    <!-- main panel -->
+    <div class="main-panel">
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar bar1"></span>
+                        <span class="icon-bar bar2"></span>
+                        <span class="icon-bar bar3"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">Rule Generator</a>
+                </div>
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="javascript:void(0);" class="js-preview"><i class="ti-eye"></i> <p>Preview</p></a></li>
+                        <li><a href="javascript:void(0);" class="js-clear"><i class="ti-brush-alt"></i> <p>Clear</p></a></li>
+                        <!--<li><a href="javascript:void(0);" class="js-clear"><i class="ti-brush-alt"></i> <p>Save As</p></a></li>-->
+						<!--<li><a href="javascript:void(0);" class="js-save"><i class="ti-save"></i> <p>Save</p></a></li>-->
+                    </ul>
+
+                </div>
+            </div>
+        </nav>
+
+        <!-- canvas -->
+        <div class="content">
+            <div class="container-fluid canvas">
+
+            </div>
+        </div>
+
+    </div>
+
+</div><!-- wrapper -->
+<div id="rule_placeholder" class="hide">
+    <div class="ly-row placeholder rule-placeholder" data-oid="0">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card bg-rule arg-placeholder">
+                <div class="content">Drop rule here </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+
+<div id="popover_form" class="hide">    
+    <div class="form-inline pull-right">
+        <select class="form-control border-input js-func-select"></select>
+        <a class="btn btn-xs btn-info js-copy" href="javascript:void(0);"><i class="ti-files"></i></a>
+        <a class="btn btn-xs btn-info js-paste" href="javascript:void(0);"><i class="ti-zip"></i></a>
+        <a class="btn btn-xs btn-danger js-remove" href="javascript:void(0);"><i class="ti-trash"></i></a>
+    </div>
+</div>
+
+<!--<div class="modal fade" id="preview_modal">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h5 class="modal-title">Preview</h5>
+            </div>
+            <div class="modal-body">
+                <textarea class="form-control" id="test"></textarea>
+            </div>
+            <div class="modal-footer">
+                &lt;!&ndash;<button type="button" class="btn btn-primary">Save changes</button>&ndash;&gt;
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>-->
+<div id="preview_modal" class="hide"><textarea class="form-control"></textarea></div>
+</body>
+
+    <!--   Core JS Files   -->
+    <script src="assets/js/jquery-1.10.2.js" type="text/javascript"></script>
+	<script src="assets/js/bootstrap.min.js" type="text/javascript"></script>
+
+	<!--  Checkbox, Radio & Switch Plugins -->
+	<script src="assets/js/bootstrap-checkbox-radio.js"></script>
+
+    <!--  Notifications Plugin    -->
+    <script src="assets/js/bootstrap-notify.js"></script>
+
+    <!-- Drag & Drop -->
+    <script src="assets/js/jquery-ui.js"></script>
+
+    <!-- Layer js -->
+    <script src="assets/layer/layer.js"></script>
+
+    <script src="assets/js/keyword-maker.js"></script>
+
+</html>
