@@ -1138,8 +1138,8 @@
 					$popoverFm
 						.removeClass('hide')
 						.position({
-							my: 'right+5 bottom+3',
-							at: 'right top',
+							my: 'center bottom+3', // right+5 bottom+3
+							at: 'center top', // right top
 							of: that,
 							collision: 'fit',
 							within: '.main-panel'
