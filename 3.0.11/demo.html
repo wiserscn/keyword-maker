@@ -63,7 +63,9 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="card bg-rule">
-                                            <div class="header">rule</div>
+                                            <div class="header">
+                                                <span class="js-argname">rule</span> (<span class="js-argscore">^20/10/5/1</span>)
+                                            </div>
                                             <div class="content">
                                                 <ul class="list-inline arg-container">
                                                     <li class="placeholder li-placeholder">
@@ -90,7 +92,7 @@
                             </div>
                             <div class="view">
                                 <ul class="module">
-                                    <li class="argument box-operator" data-arg-type="Operator">
+                                    <li class="argument box-operator" data-arg-type="Operator" data-char-distance="" data-sent-distance="">
                                         <div class="card">
                                             <div class="header">AND/PAR</div>
                                             <div class="content">
@@ -278,12 +280,29 @@
     </div>
 </div>
 
-<div id="popover_form" class="hide">    
+<div id="popover_form" class="">
     <div class="form-inline pull-right">
-        <select class="form-control border-input js-func-select"></select>
-        <a class="btn btn-xs btn-info js-copy" href="javascript:void(0);"><i class="ti-files"></i></a>
-        <a class="btn btn-xs btn-info js-paste" href="javascript:void(0);"><i class="ti-zip"></i></a>
-        <a class="btn btn-xs btn-danger js-remove" href="javascript:void(0);"><i class="ti-trash"></i></a>
+        <!--<select class="form-control border-input js-pop-widget js-func-select"></select>-->
+        <!--<select class="form-control border-input js-func-newselect-" title="insert an operator"><option value="">Choose to add...</option></select>-->
+        <a class="btn btn-fill btn-sm btn-success js-pop-widget  js-newrule" href="javascript:void(0);" title="insert a rule">+<i class="ti-ink-pen"></i></a>
+        <a class="btn btn-fill btn-sm btn-success js-pop-widget  js-newlist" href="javascript:void(0);" title="insert a list">+<i class="ti-envelope"></i></a>
+        <a class="btn btn-fill btn-sm js-pop-widget  js-copy" href="javascript:void(0);" title="copy"><i class="ti-files"></i></a>
+        <a class="btn btn-fill btn-sm js-pop-widget  js-paste" href="javascript:void(0);" title="paste"><i class="ti-bookmark-alt"></i></a>
+        <a class="btn btn-fill btn-sm js-pop-widget  btn-danger js-remove" href="javascript:void(0);" title="delete"><i class="ti-trash"></i></a>
+    </div>
+    <div class="dropdown js-pop-widget js-func-droplist" title="change function">
+        <button class="btn btn-fill btn-sm btn-success dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="true">
+            <i class="ti-package"></i>
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu pop-dropdown-menu"></ul>
+    </div>
+    <div class="dropdown js-pop-widget js-func-new" title="insert an operator">
+        <button class="btn btn-fill btn-sm btn-success dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="true">
+            + <i class="ti-package"></i>
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu pop-dropdown-menu"></ul>
     </div>
 </div>
 

@@ -86,8 +86,8 @@
 			folderdata.list.push(folder);
 
 			this.save(folderdata);
-			this.show(newindex);
 			page.helper.clearCanvas();
+			this.show(newindex);
 			this.refreshList();
 			return folderdata;
 		},
@@ -229,6 +229,45 @@
 		hasupdate: false, // flag to avoid multiple same update operation.
 		setUpateReady: function() { _tool.hasupdate = true; },
 		resetUpdate: function() { _tool.hasupdate = false; },
+		insertNewArg: function(targetOid, argType, func) {
+			if (!targetOid) targetOid = _memo.selected_arg_oid;
+			var  $targetArg = $(".argument[data-oid=" + targetOid + "]");
+			var $targetArgContianer = $targetArg.find(".arg-container:first"),
+				$newArg, $newListChip, newoid;
+
+			if (argType === _const.list) {
+				$newArg = $(".sample-arg-list .ly-list .box-list").clone();
+				$newListChip = $newArg.find(".argument");
+				newoid = _memo.newOid(_const.list_chip);
+				$newListChip.attr("data-oid", newoid);
+				$newListChip.attr("data-ref-oid", newoid);
+				_memo.propdata[newoid].isorigin = true;
+				this.appendArg($targetArgContianer, $newArg);
+			} else if (argType === _const.operator) {
+				$newArg = $(".sample-arg-list .ly-operator .box-operator").clone();
+				var parentRank = $targetArg.attr("data-scope-rank");
+				var parentFunc = $targetArg.attr("data-func");
+				var childRank = _const.operatorFuncs[func].scopeRank;
+				var childFunc = func;
+				if (parentRank && childRank != 0 && parentRank != 0 && parseInt(childRank) > parseInt(parentRank)) {
+					page.showNotification("Scope restriction: " + childFunc + " cannot be dropped in " + parentFunc);
+					return false;
+				}
+
+				$newArg.find(".header:first").html(func);
+				$newArg.attr("data-oid", _memo.newOid());
+				$newArg.attr("data-func", childFunc);
+				$newArg.attr("data-arg-limit", _const.operatorFuncs[func].limit);
+				$newArg.attr("data-scope-rank", childRank);
+				this.appendArg($targetArgContianer, $newArg);
+			} else if (argType === _const.rule) {
+				$newArg = $(".sample-arg-list .ly-row[data-arg-type='Rule']").clone();
+				$newArg.attr("data-oid", _memo.newOid());
+				$(".canvas").append($newArg);
+				page.helper.rearrangeRulePlaceholder();
+			}
+			page.rebindEvents();
+		},
 		// copy an argument to copy board
 		copyArg: function(copyOid) {
 			var copySource = $(".argument[data-oid=" + copyOid + "]"),
@@ -294,14 +333,14 @@
 						//$argContainer = $targetArg.find(".list-arg-container");
 						//$listchip = $copy.find(".argument[data-arg-type=ListChip").clone();
 						//$argContainer.append($listchip);
-						$copy.insertBefore($targetArg);
+						$copy.insertAfter($targetArg);
 						refoid = $copy.attr("data-ref-oid");
 						_memo.propdata[refoid].isorigin = true;
 						success = true;
 					}
 				} else if (targetOid === _const.canvas_oid) {
 					if (copyArgType === rule) {
-						header = $copy.find(".header:first");
+						header = $copy.find(".header:first>.js-argname");
 						headerTitle = header.text();
 						header.html(headerTitle + " - copy");
 						$(".canvas").append($copy);
@@ -358,7 +397,8 @@
 				//$targetArg.attr("data-arg-name", argName);
 				$targetArg.attr("data-score", score);
 				$targetArg.attr("data-ws-tolerance", wsTolerance);
-				$targetArg.find(".header:first").html(argName);
+				$targetArg.find(".header:first>.js-argname").html(argName);
+				$targetArg.find(".header:first>.js-argscore").html(score);
 			}
 			if (argType === _const.operator) {
 				$targetArg.attr("data-func", func);
@@ -372,7 +412,9 @@
 				//$targetArg.attr("data-arg-name", argName);
 				//$targetArg.attr("data-ws-tolerance", wsTolerance);
 				_memo.propdata[refoid].wsTolerance = wsTolerance;
-				$targetArg.find(".header:first").html(argName);
+				_memo.propdata[refoid].argname = argName;
+				$(".argument[data-ref-oid='" + refoid + "'").find(".header:first").html(argName);
+				//$targetArg.find(".header:first").html(argName);
 				if (kwdlist !== "" && refoid) {
 					_memo.propdata[refoid].kwdlist = kwdlist.split("\n");
 				}
@@ -393,6 +435,7 @@
 				showDistanceParam = false,
 				propdata, wsTolerance, kwdlist;
 
+			if (argType === _const.rule) headerTitle = $targetArg.find(".header:first>.js-argname").text();
 			if (refoid) {
 				propdata = _memo.propdata[refoid];
 			} else {
@@ -462,10 +505,15 @@
 		},
 		// add highlight effect to argument
 		highlightArg: function(argEle, highlightClass) {
-			$(".canvas .card").removeClass(highlightClass);
+			_tool.clearHighlight(highlightClass);
+			//$(".canvas .card").removeClass(highlightClass);
 			// $(".canvas .argument").removeClass(highlightClass);
 			// argEle.addClass(highlightClass);
 			argEle.find(".card:first").removeClass("select-highlight copy-highlight").addClass(highlightClass);
+		},
+		highlightByRefoid: function(refoid, highlightClass) {
+			_tool.clearHighlight(highlightClass);
+			$(".argument[data-ref-oid=" + refoid + "]").find(".card:first").removeClass("select-highlight copy-highlight").addClass(highlightClass);
 		},
 		clearHighlight: function(highlightClass) {
 			if (highlightClass) {
@@ -527,12 +575,21 @@
 		// * joinword: could be "", or like "3s2" which is defined for AND/PRE
 		unitList: function(argList, joinword) {
 			var unit = function(prev, curr, currInd) {
-				var result = [];
-				var keywordList1 = prev;
-				var keywordList2 = _render.concatKwdList(curr);
+				var result = [],
+					keywordList1 = prev,
+					keywordList2;
 
-				// only the first list need to concat, the later prev arguments will be a united list
-				if (currInd === 1) keywordList1 = _render.concatKwdList(prev);
+				if (prev.func) {
+					keywordList1 = _render.renderOperator(prev);
+				} else if (currInd === 1) {
+					// only the first list need to concat, the later prev arguments will be a united list
+					keywordList1 = _render.concatKwdList(prev);
+				}
+				if (curr.func) {
+					keywordList2 = _render.renderOperator(curr);
+				} else {
+					keywordList2 = _render.concatKwdList(curr);
+				}
 
 				for (var i= 0, len1 = keywordList1.length; i < len1; i++) {
 					for (var j= 0, len2 = keywordList2.length; j < len2; j++) {
@@ -592,6 +649,9 @@
 			var funcs = _const.operatorFuncs;
 			$.each(funcs, function (name) {
 				$('.js-func-select').append(new Option(name));
+				//$('.js-func-newselect').append(new Option(name));
+				$(".js-func-droplist>.dropdown-menu").append('<li><a href="#" data-func="' + name +'" class="js-func-option">' + name + '</a></li>');
+				$(".js-func-new>.dropdown-menu").append('<li><a href="#" class="js-func-option">' + name + '</a></li>');
 			});
 		},
 		initContainer: function() {
@@ -753,7 +813,10 @@
 					$thisArg.attr("data-arg-limit",argLimit);
 					$thisArg.attr("data-scope-rank",scopeRank);
 					$placeholder = $argContainer.find(">.li-placeholder");
-					page.helper.toggleCharDistProp(_const.operatorFuncs[func].hasDistanceDefine);
+					//page.helper.toggleCharDistProp(_const.operatorFuncs[func].hasDistanceDefine);
+					//_tool.showArg(oid);
+					$thisArg.click();
+					page.events.clickArgument();
 					if (argNum < argLimit) {
 						if ($placeholder.length === 0) page.helper.addArgPlaceHolder($argContainer);
 					} else { // argNum == argLimit
@@ -983,7 +1046,7 @@
 							}
 						}
 						$(".arg-container, .list-arg-container").removeClass("ui-state-active ui-state-hover");
-						//page.rebindEvents();
+						page.rebindEvents();
 						if(_save.stopsave>0) _save.stopsave--;
 						_save.startdrag = 0;
 					}
@@ -1032,17 +1095,44 @@
 			hoverOnArgument: function() {
 				var timeoutId;
 				var positionForm = function(that) {
-					var $popoverFm = $("#popover_form");
-					var $popDropDown = $popoverFm.find("select");
+					var $popoverFm = $("#popover_form"),
+						//$funcdrop = $popoverFm.find(".js-func-select"),
+						//$newfuncdrop = $popoverFm.find(".js-func-newselect"),
+						$funcdrop = $popoverFm.find(".js-func-droplist"),
+						$newfuncdrop = $popoverFm.find(".js-func-new"),
+						$newlist = $popoverFm.find(".js-newlist"),
+						$newrule = $popoverFm.find(".js-newrule"),
+						$copy = $popoverFm.find(".js-copy"),
+						$paste = $popoverFm.find(".js-paste"),
+						$remove = $popoverFm.find(".js-remove"),
+						targetoid = that.attr("data-oid");
 
-					// prepare work, set drop down menu value
-					if (that.hasClass("box-operator")) {
-						$popDropDown.show();
-						$popDropDown.val(that.find(".header:first").text());
+
+					$popoverFm.find(".js-pop-widget").hide();
+					$paste.show(); // always show this button, it's used everywhere
+					if (that.hasClass("placeholder")) { // hover on argument placeholder
+						if (that.hasClass("ly-row")) { // rule argument placeholder
+							$newrule.show();
+						} else {
+							$newfuncdrop.show();
+							$newfuncdrop.val("");
+							$newlist.show();
+						}
+						targetoid = that.closest(".argument").attr("data-oid");
+						if (!targetoid) targetoid = _const.canvas_oid;
 					} else {
-						$popDropDown.hide();
+						$copy.show();
+						$remove.show();
 					}
-					$popoverFm.attr("target-oid", that.attr("data-oid"));
+					if (that.hasClass("box-operator")) {
+						var func = that.attr("data-func");
+						$funcdrop.show();
+						$funcdrop.find(".dropdown-menu a").removeClass("list-group-item-danger");
+						$funcdrop.find(".dropdown-menu a[data-func='" + func + "']").addClass("list-group-item-danger");
+						$funcdrop.val(that.find(".header:first").text());
+					}
+
+					$popoverFm.attr("target-oid", targetoid);
 
 					// position form
 					$popoverFm
@@ -1051,11 +1141,12 @@
 							my: 'right+5 bottom+3',
 							at: 'right top',
 							of: that,
-							collision: 'none',
-							within: '.canvas'
+							collision: 'fit',
+							within: '.main-panel'
 						});
+					$('.dropdown.open .dropdown-toggle').dropdown('toggle'); // hide dropdown menu
 				};
-				$(".canvas").on("mouseover", ".argument", function(e) {
+				$(".canvas").on("mouseover", ".argument,.placeholder", function(e) {
 					var $popoverFm = $("#popover_form");
 					var that = $(this);
 					if (!timeoutId) {
@@ -1066,10 +1157,9 @@
 							timeoutId = window.setTimeout(function() {
 								timeoutId = null;
 								positionForm(that);
-							}, 300);
+							}, 100);
 						}
 					}
-
 					// keep form when mouse over pop form
 					$popoverFm.on('mouseenter', function () {
 						$popoverFm.removeClass('hide');
@@ -1094,9 +1184,15 @@
 					_tool.updateArg();
 
 					var that = $(this),
-						oid = _memo.selected_arg_oid = that.attr("data-oid");
+						argtype = that.attr("data-arg-type"),
+						oid = _memo.selected_arg_oid = that.attr("data-oid"),
+						refoid = that.attr("data-ref-oid");
 
-					_tool.highlightArg(that, _const.select_highlight_class);
+					if (argtype === _const.list_chip) {
+						_tool.highlightByRefoid(refoid, _const.select_highlight_class);
+					} else {
+						_tool.highlightArg(that, _const.select_highlight_class);
+					}
 					_tool.showArg(oid);
 					page.events.switchOnPropPanel();
 					e.stopPropagation();
@@ -1288,16 +1384,24 @@
 			};
 
 			// click event on popover form
-			$("#popover_form").on("click", ".js-copy", function() {
+			$("#popover_form").on("click", function() {
+				//$("#popover_form").addClass("hide");
+			}).on("click", ".js-copy", function() {
 				var oid = $("#popover_form").attr("target-oid");
 				_tool.copyArg(oid);
+			}).on("click", ".js-newlist", function() {
+				var oid = $("#popover_form").attr("target-oid");
+				_tool.insertNewArg(oid, _const.list);
+			}).on("click", ".js-newrule", function() {
+				var oid = $("#popover_form").attr("target-oid");
+				_tool.insertNewArg(oid, _const.rule);
 			}).on("click", ".js-paste", function() {
 				var oid = $("#popover_form").attr("target-oid");
 				_tool.pasteArg(oid);
 			}).on("click", ".js-remove", function() {
 				var oid = $("#popover_form").attr("target-oid");
 				_tool.removeArg(oid);
-			}).on("change", ".js-func-select", function() {
+			})/*.on("change", ".js-func-select", function() {
 				var oid = $("#popover_form").attr("target-oid");
 				var $operator = $(".argument[data-oid=" + oid + "]");
 				var func = $(this).val();
@@ -1308,7 +1412,23 @@
 					//restore to previous value
 					$(this).val($operator.attr("data-func"));
 				}
-			});
+			})*/.on("click", ".js-func-new .js-func-option", function() {
+				var oid = $("#popover_form").attr("target-oid");
+				var func = $(this).text();
+				_tool.insertNewArg(oid, _const.operator, func);
+			}).on("click", ".js-func-droplist .js-func-option", function() {
+				var oid = $("#popover_form").attr("target-oid");
+				var $operator = $(".argument[data-oid=" + oid + "]");
+				var func = $(this).text();
+				var res = page.helper.updateOperatorType(func, oid);
+				if (res) {
+					$("#argument_prop").find(".js-func-select").val(func);
+				}
+			})/*.on("change", ".js-func-newselect", function() {
+				var oid = $("#popover_form").attr("target-oid");
+				var func = $(this).val();
+				if (func !== "") _tool.insertNewArg(oid, _const.operator, func);
+			});*/
 
 			 //click event on prop panel
 			$("#argument_prop").on("click", ".js-update", updateArgFunc)
