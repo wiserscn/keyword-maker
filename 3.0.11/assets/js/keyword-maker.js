@@ -129,6 +129,10 @@
 				folderdata.lastShowFolderIndex = index;
 				this.save(folderdata);
 
+				// clear memo
+				_memo.selected_arg_oid = _const.canvas_oid;
+				_memo.copyitem = null;
+
 				page.rebindEvents();
 				page.initContainer();
 			}
@@ -283,18 +287,18 @@
 			if (!targetOid) targetOid = _memo.selected_arg_oid;
 			var $copyitem = _memo.copyitem;
 			if ($copyitem !== null) {
-				var $copy = $copyitem.clone();
+				var $toAppendCopy = $copyitem.clone();
 				var $targetArg = $(".argument[data-oid=" + targetOid + "]");
-				var $childArgs = $copy.find(".argument");
+				var $childArgs = $toAppendCopy.find(".argument");
 				var $argContainer = $targetArg.find(".arg-container:first");
 				var targetArgType = $targetArg.attr("data-arg-type");
-				var copyArgType = $copy.attr("data-arg-type");
+				var copyArgType = $toAppendCopy.attr("data-arg-type");
 				//var canvas = "canvas",
 				var rule = _const.rule, operator = _const.operator, list = _const.list, list_chip = _const.list_chip;
 				var success = false;
 				var refoid, $listchip, $toAppendArg, header, headerTitle;
 
-				$copy.attr("data-oid", _memo.newOid());
+				$toAppendCopy.attr("data-oid", _memo.newOid());
 				$childArgs.each(function() {
 					var that = $(this),
 						//originOid = that.attr("data-oid"),
@@ -315,13 +319,13 @@
 				if (targetArgType === rule || targetArgType === operator) {
 					if (copyArgType === operator || copyArgType === list_chip) {
 						if (copyArgType === operator) {
-							$toAppendArg = $copy;
+							$toAppendArg = $toAppendCopy;
 						} else {
-							$listchip = $copy;
+							$listchip = $toAppendCopy;
 							$toAppendArg = page.helper.createListArgContainer();
 							$toAppendArg.find("ul").append($listchip);
 
-							refoid = $copy.attr("data-ref-oid");
+							refoid = $toAppendCopy.attr("data-ref-oid");
 							_memo.propdata[refoid].isorigin = true;
 						}
 
@@ -331,19 +335,19 @@
 				} else if (targetArgType === list_chip) {
 					if (copyArgType === list_chip) {
 						//$argContainer = $targetArg.find(".list-arg-container");
-						//$listchip = $copy.find(".argument[data-arg-type=ListChip").clone();
+						//$listchip = $toAppendCopy.find(".argument[data-arg-type=ListChip").clone();
 						//$argContainer.append($listchip);
-						$copy.insertAfter($targetArg);
-						refoid = $copy.attr("data-ref-oid");
+						$toAppendCopy.insertAfter($targetArg);
+						refoid = $toAppendCopy.attr("data-ref-oid");
 						_memo.propdata[refoid].isorigin = true;
 						success = true;
 					}
 				} else if (targetOid === _const.canvas_oid) {
 					if (copyArgType === rule) {
-						header = $copy.find(".header:first>.js-argname");
+						header = $toAppendCopy.find(".header:first>.js-argname");
 						headerTitle = header.text();
 						header.html(headerTitle + " - copy");
-						$(".canvas").append($copy);
+						$(".canvas").append($toAppendCopy);
 						page.helper.rearrangeRulePlaceholder();
 						success = true;
 					}
@@ -379,7 +383,7 @@
 		updateArg: function(oid) {
 			if (_tool.hasupdate === false) return;
 			if (!oid) oid = _memo.selected_arg_oid;
-			if (oid === "oid_0") return;
+			if (oid === _const.canvas_oid) return;
 			var $targetArg = $(".argument[data-oid=" + oid + "]"),
 				$propPanel = $(".prop-panel"),
 				refoid = $targetArg.attr("data-ref-oid"),
@@ -1418,7 +1422,6 @@
 				_tool.insertNewArg(oid, _const.operator, func);
 			}).on("click", ".js-func-droplist .js-func-option", function() {
 				var oid = $("#popover_form").attr("target-oid");
-				var $operator = $(".argument[data-oid=" + oid + "]");
 				var func = $(this).text();
 				var res = page.helper.updateOperatorType(func, oid);
 				if (res) {
